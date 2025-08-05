@@ -164,16 +164,17 @@ async function convert(src: string, dst: string, name: string, isClient: boolean
 
         // 写入流
         if (r["undefined"] == null) {
-            await fs.writeFileSync(dir + name + ".json", JSON.stringify(r));
+            let n_name = name
+            await fs.writeFileSync(dir + n_name + ".json", JSON.stringify(r));
 
             // 生成客户端脚本
             if (isClient) {
-                createTsClient(name, types_client, r, primary);
+                createTsClient(n_name, types_client, r, primary);
             }
             else {
-                createTsServer(name, types_client, r, primary);
+                createTsServer(n_name, types_client, r, primary);
             }
-            console.log(isClient ? "客户端数据" : "服务器数据", "生成成功", dir + name + ".json");
+            console.log(isClient ? "客户端数据" : "服务器数据", "生成成功", dir + n_name + ".json");
         }
         else {
             console.log(isClient ? "客户端数据" : "服务器数据", "无数据", dir + name + ".json");

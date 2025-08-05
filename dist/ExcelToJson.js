@@ -162,15 +162,16 @@ async function convert(src, dst, name, isClient, dir) {
         });
         // 写入流
         if (r["undefined"] == null) {
-            await fs_1.default.writeFileSync(dir + name + ".json", JSON.stringify(r));
+            let n_name = name;
+            await fs_1.default.writeFileSync(dir + n_name + ".json", JSON.stringify(r));
             // 生成客户端脚本
             if (isClient) {
-                (0, JsonToTs_1.createTsClient)(name, types_client, r, primary);
+                (0, JsonToTs_1.createTsClient)(n_name, types_client, r, primary);
             }
             else {
-                (0, JsonToTs_1.createTsServer)(name, types_client, r, primary);
+                (0, JsonToTs_1.createTsServer)(n_name, types_client, r, primary);
             }
-            console.log(isClient ? "客户端数据" : "服务器数据", "生成成功", dir + name + ".json");
+            console.log(isClient ? "客户端数据" : "服务器数据", "生成成功", dir + n_name + ".json");
         }
         else {
             console.log(isClient ? "客户端数据" : "服务器数据", "无数据", dir + name + ".json");
