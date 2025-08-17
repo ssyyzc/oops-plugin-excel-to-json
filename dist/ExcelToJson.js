@@ -27,7 +27,6 @@ async function convert(src, dst, name, isClient, dir) {
     // let primary: string[] = [];     // 多主键配置
     // let primary_index: number[] = [];
     const workbook = new exceljs_1.default.Workbook();
-    console.log(`\n工作表名称`);
     // 读取excel
     await workbook.xlsx.readFile(src);
     // workbook.getWorksheet()
@@ -44,7 +43,9 @@ async function convert(src, dst, name, isClient, dir) {
         let clients = []; // 是否输出客户端字段数据
         let primary = []; // 多主键配置
         let primary_index = [];
-        console.log(`\n工作表名称: ${name} (ID: ${sheetId})`);
+        let key_types = []; // 多主键配置
+        let key_types_index = [];
+        // console.log(`\n工作表名称: ${name} (ID: ${sheetId})`);
         // const worksheet = workbook.getWorksheet(1);                 // 获取第一个worksheet 
         worksheet.eachRow((row, rowNumber) => {
             let data = {};
@@ -55,11 +56,15 @@ async function convert(src, dst, name, isClient, dir) {
                     names.push(value);
                     if (value.indexOf("【KEY】") > -1)
                         primary_index.push(colNumber);
+                    if (value.indexOf("【TYPE】") > -1)
+                        key_types_index.push(colNumber);
                 }
                 else if (rowNumber === 2) { // 字段英文名
                     keys.push(value);
                     if (primary_index.indexOf(colNumber) > -1)
                         primary.push(value);
+                    if (key_types_index.indexOf(colNumber) > -1)
+                        key_types.push(value);
                 }
                 else if (rowNumber === 3) { // 通用字段数据类型
                     types.push(value);
@@ -166,19 +171,24 @@ async function convert(src, dst, name, isClient, dir) {
             await fs_1.default.writeFileSync(dir + n_name + ".json", JSON.stringify(r));
             // 生成客户端脚本
             if (isClient) {
-                (0, JsonToTs_1.createTsClient)(n_name, types_client, r, primary);
+                // load_json_str += `await JsonUtil.loadAsync(Table${n_name}.TableName)\n`;
+                (0, JsonToTs_1.createTsClient)(n_name, types_client, r, primary, key_types);
             }
             else {
                 (0, JsonToTs_1.createTsServer)(n_name, types_client, r, primary);
             }
-            console.log(isClient ? "客户端数据" : "服务器数据", "生成成功", dir + n_name + ".json");
+            // console.log(isClient ? "客户端数据" : "服务器数据", "生成成功", dir + n_name + ".json");
+            console.log(`await JsonUtil.loadAsync(Table${n_name}.TableName)\n`)
         }
         else {
             console.log(isClient ? "客户端数据" : "服务器数据", "无数据", dir + name + ".json");
         }
     });
+    // console.log(load_json_str);
 }
 function run() {
+    console.log(`======================开始导出======================`)
+    
     var inputExcelPath = path_1.default.join(__dirname, main_1.config.PathExcel.replace("project://", "../../../") + "/");
     var outJsonPathClient = path_1.default.join(__dirname, main_1.config.PathJsonClient.replace("project://", "../../../") + "/");
     var outJsonPathServer = null;

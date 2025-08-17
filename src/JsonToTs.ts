@@ -9,7 +9,7 @@ import { config } from "./main";
 
 const fs = require('fs')
 
-export async function createTsClient(name: string, fieldType: any, data: any, primary: string[]) {
+export async function createTsClient(name: string, fieldType: any, data: any, primary: string[], key_types : string[]) {
     // 主键参数
     var script_init_params = "";
     var script_init_data = "";
@@ -32,6 +32,24 @@ export async function createTsClient(name: string, fieldType: any, data: any, pr
     script_init_var = script_init_var.substring(0, script_init_var.length - 5);
     script_init_value = script_init_value.substring(0, script_init_value.length - 9);
 
+    let type_str = "";
+    for(let i in key_types){
+        let type = key_types[i]
+        let map : any = {}
+
+        for(let id in data){
+            let d = data[id]
+            let n_key = d[type]
+            if(!map[n_key]) map[n_key] = []
+            map[n_key].push(id)
+        }
+        type_str += "\n\n"
+        for(let j in map){
+            let list = map[j]
+            type_str += `    static get_${type}_${j}() { return [${list.join(",")}] }\n`
+        }
+    }
+
     // 字段
     var field = "";
     for (var id in fieldType) {
@@ -48,7 +66,7 @@ export async function createTsClient(name: string, fieldType: any, data: any, pr
 import { JsonUtil } from "db://oops-framework/core/utils/JsonUtil";
 
 export class Table${name} {
-    static TableName: string = "${name}";
+    static TableName: string = "${name}";${type_str}
 
     private data: any;
 
