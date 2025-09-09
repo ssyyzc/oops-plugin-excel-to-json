@@ -118,12 +118,13 @@ async function convert(src: string, dst: string, name: string, isClient: boolean
                                     zh: names[index]
                                 };
                                 break;
-                            case "any":
+                            // case "any":
+                            default:
                                 // console.warn(`${index}int`, key, value, cell.string, cell.number, cell.result)
                                 try {
                                     data[key] = JSON.parse(value);
                                     types_client[key] = {
-                                        en: "any",
+                                        en: type,
                                         zh: names[index]
                                     };
                                 }

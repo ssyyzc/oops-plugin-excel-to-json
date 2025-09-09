@@ -29,6 +29,7 @@ async function convert(src, dst, name, isClient, dir) {
     const workbook = new exceljs_1.default.Workbook();
     // 读取excel
     await workbook.xlsx.readFile(src);
+    let load_json_str = "";
     // workbook.getWorksheet()
     workbook.eachSheet(async (worksheet, sheetId) => {
         if (workbook.worksheets.length != 1) {
@@ -119,12 +120,13 @@ async function convert(src, dst, name, isClient, dir) {
                                     zh: names[index]
                                 };
                                 break;
-                            case "any":
+                            // case "any":
+                            default:
                                 // console.warn(`${index}int`, key, value, cell.string, cell.number, cell.result)
                                 try {
                                     data[key] = JSON.parse(value);
                                     types_client[key] = {
-                                        en: "any",
+                                        en: type,
                                         zh: names[index]
                                     };
                                 }
@@ -171,24 +173,21 @@ async function convert(src, dst, name, isClient, dir) {
             await fs_1.default.writeFileSync(dir + n_name + ".json", JSON.stringify(r));
             // 生成客户端脚本
             if (isClient) {
-                // load_json_str += `await JsonUtil.loadAsync(Table${n_name}.TableName)\n`;
+                load_json_str += `await JsonUtil.loadAsync(Table${n_name}.TableName)\n`;
                 (0, JsonToTs_1.createTsClient)(n_name, types_client, r, primary, key_types);
             }
             else {
                 (0, JsonToTs_1.createTsServer)(n_name, types_client, r, primary);
             }
-            // console.log(isClient ? "客户端数据" : "服务器数据", "生成成功", dir + n_name + ".json");
-            console.log(`await JsonUtil.loadAsync(Table${n_name}.TableName)\n`)
+            console.log(isClient ? "客户端数据" : "服务器数据", "生成成功", dir + n_name + ".json");
         }
         else {
             console.log(isClient ? "客户端数据" : "服务器数据", "无数据", dir + name + ".json");
         }
     });
-    // console.log(load_json_str);
+    console.log(load_json_str);
 }
 function run() {
-    console.log(`======================开始导出======================`)
-    
     var inputExcelPath = path_1.default.join(__dirname, main_1.config.PathExcel.replace("project://", "../../../") + "/");
     var outJsonPathClient = path_1.default.join(__dirname, main_1.config.PathJsonClient.replace("project://", "../../../") + "/");
     var outJsonPathServer = null;
